@@ -44,6 +44,8 @@ connect().then((connection: Connection) => {
     const whitelist = [
         'http://localhost:3000',
         'http://localhost:3001',
+        'http://ec2-13-239-33-36.ap-southeast-2.compute.amazonaws.com:3001/',
+        'http://ec2-13-239-33-36.ap-southeast-2.compute.amazonaws.com:3001',
         undefined
     ];
     const corsOptions: cors.CorsOptions = {
@@ -54,6 +56,7 @@ connect().then((connection: Connection) => {
             if (whitelist.indexOf(origin) !== -1) {
                 callback(null, true);
             } else {
+                console.log(origin);
                 callback(new HttpException(400, 'Not allowed by CORS'));
             }
         },
