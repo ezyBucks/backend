@@ -4,7 +4,6 @@
     "description": "",
     "main": "dist/server.js",
     "scripts": {
-        "preinstall": "npm install typescript -g; npm install nodemon -g",
         "build": "tsc",
         "start": "concurrently \"npm:watch-ts\" \"npm:watch-node\"",
         "prod-pm2": "pm2 start dist/server.js -i 2",
