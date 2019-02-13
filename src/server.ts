@@ -14,66 +14,60 @@ const PORT = process.env.PORT || 8081;
 
 require('dotenv').config();
 
-connect().then((connection: Connection) => {
-    // Hacks as well need to wait for the DB connection to be established.
-    require('./auth/passport.middleware');
+// Establish connection to DB
+connect();
 
-    const app = express();
+// Hacks as well need to wait for the DB connection to be established.
+require('./auth/passport.middleware');
 
-    // Cookies!
-    app.use(cookieParser('secret'));
+const app = express();
 
-    // support application/json type post data
-    app.use(bodyParser.json());
+// Cookies!
+app.use(cookieParser('secret'));
 
-    // support for express-validator
-    app.use(expressValidator());
+// support application/json type post data
+app.use(bodyParser.json());
 
-    // support application/x-www-form-urlencoded post data -- We can probs remove this if we only want JSON
-    app.use(
-        bodyParser.urlencoded({
-            extended: false
-        })
-    );
+// support for express-validator
+app.use(expressValidator());
 
-    // Setup Auth JWT
-    app.use(passport.initialize());
+// support application/x-www-form-urlencoded post data -- We can probs remove this if we only want JSON
+app.use(
+    bodyParser.urlencoded({
+        extended: false
+    })
+);
 
-    // Supporting credential calls with CORS from FETCH
-    // Undefined allows postman/insomnia to work
-    const whitelist = [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        undefined
-    ];
-    const corsOptions: cors.CorsOptions = {
-        origin: (
-            origin: string,
-            callback: (error: any, origin?: any) => void
-        ) => {
-            if (whitelist.indexOf(origin) !== -1) {
-                callback(null, true);
-            } else {
-                callback(new HttpException(400, 'Not allowed by CORS'));
-            }
-        },
-        credentials: true
-    };
+// Setup Auth JWT
+app.use(passport.initialize());
 
-    // enable All CORS Requests
-    app.use(cors(corsOptions));
+// Supporting credential calls with CORS from FETCH
+// Undefined allows postman/insomnia to work
+const whitelist = ['http://localhost:3000', 'http://localhost:3001', undefined];
+const corsOptions: cors.CorsOptions = {
+    origin: (origin: string, callback: (error: any, origin?: any) => void) => {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new HttpException(400, 'Not allowed by CORS'));
+        }
+    },
+    credentials: true
+};
 
-    // Register the routes
-    registerRoutes(app);
+// enable All CORS Requests
+app.use(cors(corsOptions));
 
-    // Default error handler
-    app.use(errorMiddleware);
+// Register the routes
+registerRoutes(app);
 
-    app.get('/', (req, res) => {
-        res.json({ success: true, message: 'pong!' });
-    });
+// Default error handler
+app.use(errorMiddleware);
 
-    app.listen(PORT, () => {
-        console.log('Listening on port ' + PORT);
-    });
+app.get('/', (req, res) => {
+    res.json({ success: true, message: 'pong!' });
+});
+
+app.listen(PORT, () => {
+    console.log('Listening on port ' + PORT);
 });

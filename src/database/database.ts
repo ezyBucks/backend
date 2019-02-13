@@ -8,19 +8,25 @@ const connectionOptions: ConnectionOptions = {
     username: 'postgres',
     password: 'rootpassword',
     database: 'ezybucks',
-    synchronize: true,
     logging: false,
-    entities: ['dist/entities/**/*.js'],
+    entities: ['dist/entities/*.js'],
+    migrations: ['dist/migrations/*.js'],
     cli: {
-        entitiesDir: 'backend/src/entity',
-        migrationsDir: 'backend/src/migration',
-        subscribersDir: 'backend/src/subscriber'
+        entitiesDir: 'dist/entity',
+        migrationsDir: 'dist/migration',
+        subscribersDir: 'dist/subscriber'
     }
 };
 
 const connect = async () => {
     try {
-        return createConnection(connectionOptions);
+        const connection = await createConnection(connectionOptions);
+
+        if (isDev) {
+            await connection.synchronize();
+        }
+
+        return connection;
     } catch (err) {
         console.log(err);
         throw new Error('Failed to make connection to database');

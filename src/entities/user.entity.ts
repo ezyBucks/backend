@@ -17,14 +17,6 @@ export class UserEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     public id?: number;
 
-    @IsString()
-    @Column({ nullable: true })
-    public firstname: string = '';
-
-    @IsString()
-    @Column({ nullable: true })
-    public lastname: string = '';
-
     @IsEmail()
     @Column({ nullable: true })
     public email: string = '';
@@ -40,7 +32,7 @@ export class UserEntity extends BaseEntity {
     public password: string = '';
 
     @Column({ nullable: false, default: false })
-    public isValidated: boolean = false;
+    public verified: boolean = false;
 
     public async comparePassword(potential: string) {
         return await bcrypt.compare(potential, this.password);
