@@ -7,6 +7,7 @@ import {
     Entity
 } from 'typeorm';
 import { MetaTransactionEntity } from './metatransaction.entity';
+import { IsNumber, Min } from 'class-validator';
 
 @Entity()
 export class TransactionEntity extends BaseEntity {
@@ -15,8 +16,12 @@ export class TransactionEntity extends BaseEntity {
 
     @OneToOne(type => MetaTransactionEntity)
     @JoinColumn()
-    public from: MetaTransactionEntity;
+    public metaTransaction: MetaTransactionEntity;
 
-    @Column()
+    @IsNumber()
+    @Min(0, {
+        message: 'Transaction amount must be greater than 0'
+    })
+    @Column({ nullable: false })
     public amount: number;
 }
