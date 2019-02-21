@@ -1,11 +1,10 @@
 import {
     BaseEntity,
     PrimaryGeneratedColumn,
-    OneToOne,
-    JoinColumn,
     CreateDateColumn,
     Entity,
-    OneToMany
+    OneToMany,
+    ManyToOne
 } from 'typeorm';
 
 import { UserEntity } from './user.entity';
@@ -16,12 +15,14 @@ export class MetaTransactionEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     public id?: number;
 
-    @OneToOne(type => UserEntity)
-    @JoinColumn()
+    @ManyToOne(type => UserEntity, {
+        eager: true
+    })
     public from: UserEntity;
 
-    @OneToOne(type => UserEntity)
-    @JoinColumn()
+    @ManyToOne(type => UserEntity, {
+        eager: true
+    })
     public to: UserEntity;
 
     @CreateDateColumn()
@@ -29,7 +30,10 @@ export class MetaTransactionEntity extends BaseEntity {
 
     @OneToMany(
         type => TransactionEntity,
-        transaction => transaction.metaTransaction
+        transaction => transaction.metaTransaction,
+        {
+            eager: true
+        }
     )
     public transactions: TransactionEntity[];
 }

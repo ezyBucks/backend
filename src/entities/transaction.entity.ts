@@ -1,10 +1,9 @@
 import {
     BaseEntity,
     PrimaryGeneratedColumn,
-    JoinColumn,
-    OneToOne,
     Column,
-    Entity
+    Entity,
+    ManyToOne
 } from 'typeorm';
 import { MetaTransactionEntity } from './metatransaction.entity';
 import { IsNumber, Min } from 'class-validator';
@@ -14,8 +13,7 @@ export class TransactionEntity extends BaseEntity {
     @PrimaryGeneratedColumn()
     public id?: number;
 
-    @OneToOne(type => MetaTransactionEntity)
-    @JoinColumn()
+    @ManyToOne(type => MetaTransactionEntity)
     public metaTransaction: MetaTransactionEntity;
 
     @IsNumber()

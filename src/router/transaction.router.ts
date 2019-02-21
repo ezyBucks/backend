@@ -54,33 +54,37 @@ class TransactionRoutes extends Router {
     ) {
         const data = req.body;
 
-        console.log(data);
-
         // Need to add validation to make sure the user ID exists
-
-        const metaTransaction = MetaTransactionEntity.create({
+        const metaTransactionObject = await MetaTransactionEntity.create({
             from: req.user.id,
             to: data.to
         });
 
-        const metaErrors = await validate(metaTransaction, {
+        const metaErrors = await validate(metaTransactionObject, {
             validationError: { target: false }
         });
 
         if (metaErrors.length > 0) {
             next(new HttpException(400, metaErrors));
         } else {
-            await MetaTransactionEntity.save(metaTransaction);
+            await MetaTransactionEntity.save(metaTransactionObject);
         }
 
-        // Creates the transactions for the users
-
+        // Creates the transactions in both directions
         const toTransaction = TransactionEntity.create({
-            metaTransaction: metaTranactionSaved.id
+            metaTransaction: metaTransactionObject,
+            amount: data.amount
         });
-        const fromTransaction = TransactionEntity.create(req.body);
 
-        res.send(metaTransaction);
+        const fromTransaction = TransactionEntity.create({
+            metaTransaction: metaTransactionObject,
+            amount: -data.amount
+        });
+
+        fromTransaction.save();
+        toTransaction.save();
+
+        res.send(metaTransactionObject);
     }
 }
 
