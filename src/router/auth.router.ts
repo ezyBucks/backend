@@ -147,8 +147,10 @@ class AuthRoutes extends Router {
             httpOnly: true
         });
 
+        const reflectedUser = user.fieldReflector();
+
         // Return success and the timeout for the token in seconds
-        res.json({ success: true, expiresIn: 3600, user });
+        res.json({ success: true, expiresIn: 3600, user: reflectedUser });
     }
 
     /**

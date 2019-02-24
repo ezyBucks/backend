@@ -28,7 +28,10 @@ export class UserEntity extends BaseEntity {
     @MinLength(5, {
         message: 'Password must be more than 5 characters.'
     })
-    @Column({ nullable: true })
+    @Column({
+        nullable: true,
+        select: false
+    })
     public password: string = '';
 
     @Column({ nullable: false, default: false })
@@ -42,6 +45,24 @@ export class UserEntity extends BaseEntity {
     protected async hashPassword() {
         const hash = await bcrypt.hash(this.password, 10);
         this.password = hash;
+    }
+
+    fieldReflector() {
+        let response = {};
+
+        Object.keys(this).forEach(key => {
+            let value = (this as any)[key];
+
+            if (!this.nonResponseFields().includes(key)) {
+                (response as any)[key] = value;
+            }
+        });
+
+        return response;
+    }
+
+    nonResponseFields() {
+        return ['password'];
     }
 
     // @AfterLoad()
