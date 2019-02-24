@@ -84,6 +84,8 @@ class TransactionRoutes extends Router {
         fromTransaction.save();
         toTransaction.save();
 
+        // metaTransactionObject.from = metaTransactionObject.from.fieldReflector();
+
         res.send(metaTransactionObject);
     }
 }

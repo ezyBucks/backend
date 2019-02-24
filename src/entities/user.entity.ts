@@ -9,11 +9,12 @@ import {
 } from 'typeorm';
 
 import { IsEmail, IsString, MinLength } from 'class-validator';
+import { EzyEntity } from '.';
 
 // http://typeorm.io/#/active-record-data-mapper using active record style.
 @Entity()
 @Unique(['email', 'username'])
-export class UserEntity extends BaseEntity {
+export class UserEntity extends EzyEntity {
     @PrimaryGeneratedColumn()
     public id?: number;
 
@@ -47,21 +48,7 @@ export class UserEntity extends BaseEntity {
         this.password = hash;
     }
 
-    fieldReflector() {
-        let response = {};
-
-        Object.keys(this).forEach(key => {
-            let value = (this as any)[key];
-
-            if (!this.nonResponseFields().includes(key)) {
-                (response as any)[key] = value;
-            }
-        });
-
-        return response;
-    }
-
-    nonResponseFields() {
+    protected nonResponseFields(): string[] {
         return ['password'];
     }
 
