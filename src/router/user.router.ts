@@ -13,7 +13,7 @@ class UserRoutes extends Router {
     get services() {
         return [
             new Service('get', '/user', 'getAllUsers'),
-            new Service('get', '/user:id', 'getUserById'),
+            new Service('get', '/user/:id', 'getUserById'),
             new Service('post', '/user', 'addNewUser'),
             new Service('delete', '/user', 'deleteUser')
         ];
