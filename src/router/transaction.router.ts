@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import Router from './base.router';
 import Service from './services';
-import { MetaTransactionEntity, TransactionEntity } from '../entities';
+import {
+    MetaTransactionEntity,
+    TransactionEntity,
+    UserEntity
+} from '../entities';
 import { validate, ValidationError } from 'class-validator';
 import HttpException from '../error/HttpException';
 

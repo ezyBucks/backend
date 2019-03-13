@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import UserEntity from '../entities/user.entity';
 import Router from './base.router';
 import Service from './services';
+import HttpException from '../exceptions/HttpException';
 
 /**
  * User Routes
@@ -15,7 +16,7 @@ class UserRoutes extends Router {
             new Service('get', '/user', 'getAllUsers'),
             new Service('get', '/user/:id', 'getUserById'),
             new Service('post', '/user', 'addNewUser'),
-            new Service('delete', '/user', 'deleteUser')
+            new Service('delete', '/user/:id', 'deleteUser')
         ];
     }
 
@@ -35,13 +36,11 @@ class UserRoutes extends Router {
                     name: req.query.username + '%'
                 })
                 .getMany();
-
-            console.log(req.query.username);
         } else {
             results = await UserEntity.find();
         }
 
-        res.send(results);
+        res.send({ items: results });
     }
 
     /**
@@ -71,7 +70,6 @@ class UserRoutes extends Router {
      * @param next NextFunction
      */
     public async addNewUser(req: Request, res: Response, next: NextFunction) {
-        // TODO Add validation
         const user = UserEntity.create(req.body);
         res.send(await UserEntity.save(user));
     }
@@ -86,10 +84,14 @@ class UserRoutes extends Router {
     public async deleteUser(req: Request, res: Response, next: NextFunction) {
         const user = await UserEntity.findOne(req.params.id);
         if (user) {
-            res.send(await UserEntity.remove(user));
+            user.active = false;
+            res.send(await UserEntity.save(user));
         } else {
-            res.status(404).send(
-                'Failed to find user with ID ' + req.params.id
+            next(
+                new HttpException(
+                    404,
+                    `Failed to find user with ID : ${req.params.id}`
+                )
             );
         }
     }

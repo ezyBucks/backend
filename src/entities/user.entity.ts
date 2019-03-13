@@ -38,6 +38,9 @@ export class UserEntity extends EzyEntity {
     @Column({ nullable: false, default: false })
     public verified: boolean = false;
 
+    @Column({ nullable: false, default: true })
+    public active: boolean = true;
+
     public async comparePassword(potential: string) {
         return await bcrypt.compare(potential, this.password);
     }
