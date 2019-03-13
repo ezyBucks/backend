@@ -19,11 +19,11 @@ export class UserEntity extends EzyEntity {
     public id?: number;
 
     @IsEmail()
-    @Column({ nullable: true })
+    @Column()
     public email: string = '';
 
     @IsString()
-    @Column({ nullable: true })
+    @Column()
     public username: string = '';
 
     @MinLength(5, {
