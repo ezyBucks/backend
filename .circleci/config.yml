@@ -1,11 +1,18 @@
 version: 2
 
 jobs:
-    build:
+    test:
+        environment:
+            CC_TEST_REPORTER_ID: ebb7b644eac006fbfc48e9b2660044f9c49ec629791b53e4aa4d12aec1ecccf3
         docker:
             - image: circleci/node:8
         steps:
             - checkout
+            - run:
+                  name: Set up Code Climate test-reporter
+                  command: |
+                      curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+                      chmod +x ./cc-test-reporter
             - restore_cache:
                   key: npm-cache-v1-{{ checksum "package-lock.json" }}
             - run:
@@ -17,6 +24,87 @@ jobs:
                       - /home/circleci/.npm
             - run:
                   name: Run tests
-                  command: npm test
+                  command: |
+                      # notify Code Climate of a pending test report using `before-build`
+                      ./cc-test-reporter before-build 
+                      npm test -- --coverage
+                      # upload test report to Code Climate using `after-build`
+                      ./cc-test-reporter after-build --coverage-input-type lcov --exit-code $?
             - store_test_results:
-                path: test-results
+                  path: test-results
+    build:
+        docker:
+            - image: docker:17.05.0-ce-git
+        steps:
+            - checkout
+            - setup_remote_docker:
+                  docker_layer_caching: true
+            - restore_cache:
+                  keys:
+                      - v1-{{ .Branch }}
+                  paths:
+                      - /caches/app.tar
+            - run:
+                  name: Load Docker image layer cache
+                  command: |
+                      set +o pipefail
+                      docker load -i /caches/app.tar | true
+            - run:
+                  name: Build docker image
+                  command: |
+                      docker build -t app --cache-from=app .
+            - run:
+                  name: Save Docker image layer cache
+                  command: |
+                      mkdir -p /caches
+                      docker save -o /caches/app.tar app
+            - save_cache:
+                  key: v1-{{ .Branch }}-{{ epoch }}
+                  paths:
+                      - /caches/app.tar
+            - deploy:
+                  name: Push container to repo
+                  command: |
+                      if [ "${CIRCLE_BRANCH}" == 'master' ]; then
+                          TAG=$CIRCLE_BRANCH-0.1.$CIRCLE_BUILD_NUM 
+                          docker login -u $DOCKER_USER -p $DOCKER_PASS 
+                          docker tag app "jallier/ezybucks_backend:${TAG}" 
+                          docker push "jallier/ezybucks_backend:${TAG}"
+                          docker tag app "jallier/ezybucks_backend:latest"
+                          docker push "jallier/ezybucks_backend:latest"
+                          echo "Image pushed"
+                      fi
+    deploy:
+        docker:
+            - image: circleci/node:8
+        steps:
+            - add_ssh_keys:
+                  fingerprints:
+                      - '97:c1:56:62:31:4e:8b:14:02:59:07:9c:fb:16:1b:af'
+            - run:
+                  name: Ensure key fingerprint is valid
+                  command: |
+                      ssh-keyscan 13.239.33.36 >> ~/.ssh/known_hosts
+            - run:
+                  name: Pull and restart running containers
+                  command: |
+                      ssh deployer@13.239.33.36 "./ssh_deploy.sh"
+workflows:
+    version: 2
+    workflow:
+        jobs:
+            - test
+            - build:
+                  requires:
+                      - test
+                  filters:
+                      branches:
+                          only:
+                              - master
+            - deploy:
+                  requires:
+                      - build
+                  filters:
+                      branches:
+                          only:
+                              - master

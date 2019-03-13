@@ -66,7 +66,7 @@ class AuthRoutes extends Router {
      * @param next NextFunction
      */
     public async signIn(req: Request, res: Response, next: NextFunction) {
-        if (isDev) {
+        if (isDev()) {
             const email = req.body.email;
             const user = await User.findOne({ email });
 
@@ -122,7 +122,7 @@ class AuthRoutes extends Router {
         }
 
         // correct email and password but not verified email.
-        if (!user.isValidated && !isDev) {
+        if (!user.isValidated && !isDev()) {
             return next(new HttpException(400, 'Email is not verified'));
         }
 
