@@ -27,13 +27,21 @@ class UserRoutes extends Router {
      * @param next NextFunction
      */
     public async getAllUsers(req: Request, res: Response, next: NextFunction) {
-        const items = await UserEntity.find();
-        const count = await UserEntity.count();
+        let results: UserEntity[];
 
-        res.json({
-            count,
-            items
-        });
+        if (req.query.username) {
+            results = await UserEntity.createQueryBuilder('user')
+                .where('username LIKE :name', {
+                    name: req.query.username + '%'
+                })
+                .getMany();
+
+            console.log(req.query.username);
+        } else {
+            results = await UserEntity.find();
+        }
+
+        res.send(results);
     }
 
     /**

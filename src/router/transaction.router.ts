@@ -32,10 +32,7 @@ class TransactionRoutes extends Router {
         next: NextFunction
     ) {
         const items = await MetaTransactionEntity.find();
-        const count = await MetaTransactionEntity.count();
-
         res.json({
-            count,
             items
         });
     }
