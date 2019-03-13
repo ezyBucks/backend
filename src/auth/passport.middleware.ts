@@ -21,6 +21,7 @@ passport.use(
             try {
                 const user = new User();
                 user.email = email;
+                user.username = email.substring(0, email.lastIndexOf('@'));
                 user.password = password;
 
                 const errors = await validate(user, {
