@@ -81,12 +81,20 @@ class TransactionRoutes extends Router {
             amount: -data.amount
         });
 
-        fromTransaction.save();
-        toTransaction.save();
+        // Wait for sub records to be saved.
+        // This should really be made as a function on the
+        // MetaTransaction
+        await fromTransaction.save();
+        await toTransaction.save();
 
-        // metaTransactionObject.from = metaTransactionObject.from.fieldReflector();
+        const response = await MetaTransactionEntity.findOne(
+            metaTransactionObject.id
+        );
 
-        res.send(metaTransactionObject);
+        (response.from as any) = response.from.fieldReflector();
+        (response.to as any) = response.to.fieldReflector();
+
+        res.send(response);
     }
 }
 
