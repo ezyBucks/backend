@@ -22,7 +22,7 @@ const connect = async () => {
     try {
         const connection = await createConnection(connectionOptions);
 
-        if (isDev) {
+        if (isDev()) {
             await connection.synchronize();
         }
 
