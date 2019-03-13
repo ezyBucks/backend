@@ -66,7 +66,7 @@ class AuthRoutes extends Router {
      * @param next NextFunction
      */
     public async signIn(req: Request, res: Response, next: NextFunction) {
-        if (isDev) {
+        if (isDev()) {
             const email = req.body.email;
             const user = await User.findOne({ email });
 
