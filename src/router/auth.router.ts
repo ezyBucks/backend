@@ -103,8 +103,8 @@ class AuthRoutes extends Router {
     }
 
     /**
-     * Seperate function the handle the response after running
-     * the signin authentication.
+     * Separate function the handle the response after running
+     * the sign-in authentication.
      *
      * @param error any
      * @param user UserEntity
@@ -122,7 +122,7 @@ class AuthRoutes extends Router {
         }
 
         // correct email and password but not verified email.
-        if (!user.isValidated && !isDev()) {
+        if (!user.verified && !isDev) {
             return next(new HttpException(400, 'Email is not verified'));
         }
 
@@ -147,8 +147,10 @@ class AuthRoutes extends Router {
             httpOnly: true
         });
 
+        const reflectedUser = user.fieldReflector();
+
         // Return success and the timeout for the token in seconds
-        res.json({ success: true, expiresIn: 3600 });
+        res.json({ success: true, expiresIn: 3600, user: reflectedUser });
     }
 
     /**
@@ -166,7 +168,7 @@ class AuthRoutes extends Router {
             )) as UserEntity;
 
             const user = await UserEntity.findOne(result.id);
-            user.isValidated = true;
+            user.verified = true;
             user.save();
         } catch {
             return next(new HttpException(400, 'Token expired.'));

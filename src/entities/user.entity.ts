@@ -9,21 +9,14 @@ import {
 } from 'typeorm';
 
 import { IsEmail, IsString, MinLength } from 'class-validator';
+import { EzyEntity } from '.';
 
 // http://typeorm.io/#/active-record-data-mapper using active record style.
 @Entity()
 @Unique(['email', 'username'])
-export class UserEntity extends BaseEntity {
+export class UserEntity extends EzyEntity {
     @PrimaryGeneratedColumn()
     public id?: number;
-
-    @IsString()
-    @Column({ nullable: true })
-    public firstname: string = '';
-
-    @IsString()
-    @Column({ nullable: true })
-    public lastname: string = '';
 
     @IsEmail()
     @Column({ nullable: true })
@@ -36,11 +29,14 @@ export class UserEntity extends BaseEntity {
     @MinLength(5, {
         message: 'Password must be more than 5 characters.'
     })
-    @Column({ nullable: true })
+    @Column({
+        nullable: true,
+        select: false
+    })
     public password: string = '';
 
     @Column({ nullable: false, default: false })
-    public isValidated: boolean = false;
+    public verified: boolean = false;
 
     public async comparePassword(potential: string) {
         return await bcrypt.compare(potential, this.password);
@@ -50,6 +46,10 @@ export class UserEntity extends BaseEntity {
     protected async hashPassword() {
         const hash = await bcrypt.hash(this.password, 10);
         this.password = hash;
+    }
+
+    protected nonResponseFields(): string[] {
+        return ['password'];
     }
 
     // @AfterLoad()
