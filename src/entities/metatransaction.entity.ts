@@ -4,7 +4,9 @@ import {
     CreateDateColumn,
     Entity,
     OneToMany,
-    ManyToOne
+    ManyToOne,
+    OneToOne,
+    JoinColumn
 } from 'typeorm';
 
 import { UserEntity } from './user.entity';
@@ -28,12 +30,11 @@ export class MetaTransactionEntity extends BaseEntity {
     @CreateDateColumn()
     public timestamp: string;
 
-    @OneToMany(
-        type => TransactionEntity,
-        transaction => transaction.metaTransaction,
-        {
-            eager: true
-        }
-    )
-    public transactions: TransactionEntity[];
+    @OneToOne(type => TransactionEntity)
+    @JoinColumn()
+    public toTransaction: TransactionEntity;
+
+    @OneToOne(type => TransactionEntity)
+    @JoinColumn()
+    public fromTransaction: TransactionEntity;
 }

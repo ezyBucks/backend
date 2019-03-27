@@ -54,6 +54,7 @@ class UserRoutes extends Router {
         const user = await UserEntity.findOne(req.params.id);
 
         if (!user) {
+            res.status(404);
             res.send({
                 message: `No user with the ID of ${req.params.id}`
             });
