@@ -15,9 +15,7 @@ class BalanceRoutes extends Router {
      * they will call.
      */
     get services() {
-        return [
-            new Service('get', '/balance', 'getBalance').withNoMiddleware()
-        ];
+        return [new Service('get', '/balance', 'getBalance')];
     }
 
     /**
@@ -33,7 +31,7 @@ class BalanceRoutes extends Router {
         )
             .select('SUM(sent.amount)', 'total')
             .leftJoin('metaTransaction.fromTransaction', 'sent')
-            .where('metaTransaction.from = :id', { id: 3 })
+            .where('metaTransaction.from = :id', { id: req.user.id })
             .getRawOne();
 
         const totalReceived = await MetaTransactionEntity.createQueryBuilder(
@@ -41,7 +39,7 @@ class BalanceRoutes extends Router {
         )
             .select('SUM(received.amount)', 'total')
             .leftJoin('metaTransaction.toTransaction', 'received')
-            .where('metaTransaction.to = :id', { id: 3 })
+            .where('metaTransaction.to = :id', { id: req.user.id })
             .getRawOne();
 
         const balance = {
